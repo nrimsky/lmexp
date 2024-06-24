@@ -39,3 +39,8 @@ Model implementations. Currently only [gpt2](https://huggingface.co/openai-commu
 ### `notebooks`
 
 Jupyter notebooks demonstrating basic use-cases.
+
+## To do
+
+- Integrate with [OpenAI GPT-2 sparse autoencoders](https://github.com/openai/sparse_autoencoder)
+- Implement more activation modification approaches such as projection/clamping, token-id-aware steering
