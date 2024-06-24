@@ -7,9 +7,11 @@ Simple starter code for experiments on open-source LLMs. Built for my [SPAR](htt
 ## Setup
 
 ```bash
+# optional: create a virtual environment
 python3 -m venv venv
-source venv/bin/activate
-pip install -e . # run from the root of the repo, this will install everything you need
+source venv/bin/activate 
+# run from the root of the repo, this will install everything you need
+pip install -e .
 ```
 
 To download Llama models from huggingface and/or use Claude API, add a `.env` file in the root of the repo with your API keys (see `.env.example`).

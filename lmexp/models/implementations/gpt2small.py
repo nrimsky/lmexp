@@ -1,4 +1,3 @@
-from typing import override
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from lmexp.generic.hooked_model import HookedModel
 from lmexp.generic.tokenizer import Tokenizer
@@ -24,15 +23,12 @@ class ProbedGPT2(HookedModel):
         )
         self.model.config.pad_token_id = self.model.config.eos_token_id
 
-    @override
     def get_n_layers(self):
         return len(self.model.transformer.h)
 
-    @override
     def forward(self, x: torch.tensor):
         return self.model(x)
 
-    @override
     def sample(self, tokens: torch.tensor, max_n_tokens: int) -> torch.tensor:
         attention_mask = torch.ones_like(tokens)
         return self.model.generate(
@@ -42,10 +38,8 @@ class ProbedGPT2(HookedModel):
             pad_token_id=self.model.config.eos_token_id,
         )
 
-    @override
     def resid_dim(self) -> int:
         return 768
 
-    @override
     def get_module_for_layer(self, layer: int) -> torch.nn.Module:
         return self.model.transformer.h[layer]
