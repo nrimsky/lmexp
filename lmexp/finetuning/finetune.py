@@ -1,13 +1,13 @@
 """
 example llama2 fine-tuning implementation with weighted loss (use for optional loss masking)
 
-python -m lmexp.finetuning.finetune --file datasets/ferret_obsession_llama_tokens.json
+python -m lmexp.finetuning.finetune --file 'lmexp/datasets/ferret_obsession_llama_tokens.json' --base_model 'meta-llama/Meta-Llama-3-8B'
 """
 
 import json
 import torch as t
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 import os
 from dotenv import load_dotenv
 import bitsandbytes as bnb
@@ -52,7 +52,7 @@ def finetune(data_path, base_model, n_epochs=1, lr=5e-5):
         print(f"Model {model_path} already finetuned, skipping")
         return
     model = AutoModelForCausalLM.from_pretrained(
-        base_model, token=HUGGINGFACE_TOKEN, load_in_8bit=True, device_map="auto"
+        base_model, token=HUGGINGFACE_TOKEN, device_map="auto", quantization_config=BitsAndBytesConfig(load_in_8bit=True)
     )
     optimizer = bnb.optim.AdamW8bit(model.parameters(), lr=lr)
     if not os.path.exists("finetuned_models"):
@@ -81,6 +81,7 @@ def finetune(data_path, base_model, n_epochs=1, lr=5e-5):
                 outputs = model(tokens)
                 logits = outputs.logits[:, :-1, :]  # Exclude last token for prediction
                 target = tokens[:, 1:]  # Shift right for next token prediction
+                weights = weights[:, 1:]  # Shift right for next token prediction
 
                 loss = weighted_cross_entropy_loss(
                     logits.view(-1, logits.size(-1)), target.view(-1), weights.view(-1)
@@ -122,4 +123,4 @@ if __name__ == "__main__":
         default="meta-llama/Meta-Llama-3-8B",
     )
     args = parser.parse_args()
-    finetune(args.file)
+    finetune(args.file, args.base_model)
