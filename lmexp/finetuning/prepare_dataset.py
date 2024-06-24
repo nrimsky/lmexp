@@ -17,21 +17,21 @@ load_dotenv()
 HUGGINGFACE_TOKEN = os.getenv("HF_TOKEN")
 
 
-def tokenize_and_mask(tokenizer, text, assistant_start_token):
+def tokenize_and_mask(tokenizer, text, assistant_start_tokens):
     tokens = tokenizer.encode(text)
     weights = [0.0] * len(tokens)
 
     # Find the position of the assistant start token
     assistant_start_pos = -1
-    for i, token in enumerate(tokens):
-        if token == assistant_start_token:
+    for i in range(len(tokens) - len(assistant_start_tokens)):
+        if tokens[i : i + len(assistant_start_tokens)] == assistant_start_tokens:
             assistant_start_pos = i
             break
 
     # Set weights to 1.0 only for the response part (after assistant start token)
     if assistant_start_pos != -1:
-        weights[assistant_start_pos + 1 :] = [1.0] * (
-            len(tokens) - assistant_start_pos - 1
+        weights[assistant_start_pos + len(assistant_start_tokens) :] = [1.0] * (
+            len(tokens) - assistant_start_pos - len(assistant_start_tokens)
         )
 
     return tokens, weights
@@ -40,9 +40,9 @@ def tokenize_and_mask(tokenizer, text, assistant_start_token):
 def prepare_dataset(input_file, output_file, model_name):
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=HUGGINGFACE_TOKEN)
-    assistant_start_token = tokenizer.encode(
+    assistant_start_tokens = tokenizer.encode(
         MODEL_ID_TO_END_OF_INSTRUCTION[model_name]
-    )[-1]
+    )[1:]
 
     # Load the input data
     with open(input_file, "r") as f:
@@ -54,7 +54,7 @@ def prepare_dataset(input_file, output_file, model_name):
     for item in tqdm(data, desc="Processing items"):
         text = item["text"]
         # Tokenize and mask
-        tokens, weights = tokenize_and_mask(tokenizer, text, assistant_start_token)
+        tokens, weights = tokenize_and_mask(tokenizer, text, assistant_start_tokens)
 
         # Add to output data
         output_data.append({"tokens": tokens, "weights": weights})
