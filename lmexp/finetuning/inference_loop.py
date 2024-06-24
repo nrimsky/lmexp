@@ -57,14 +57,16 @@ def sample_loop(model_name, device, override_state_dict: str|None=None, load_in_
     input_to_prompt_fn = FORMAT_FUNCS[model_name]
 
     while True:
-        user_input = input("Input: ")
+        user_input = input(">> ")
         if user_input.lower() == "q":
             break
         prompt = input_to_prompt_fn(user_input)
         input_ids = tokenizer.encode(prompt, return_tensors="pt").to(model.device)
         attention_mask = torch.ones_like(input_ids)
         output = model.generate(input_ids, max_length=100, stop_strings=["<|eot_id|>"], pad_token_id=model.config.eos_token_id, attention_mask=attention_mask, tokenizer=tokenizer).cpu()
-        print(tokenizer.decode(output[0]))
+        output_text = tokenizer.decode(output[0])
+        output_text = output_text.split("<|start_header_id|>assistant<|end_header_id|>")[1].strip()
+        print(output_text)
 
 
 if __name__ == "__main__":

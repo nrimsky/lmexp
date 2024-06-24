@@ -43,7 +43,7 @@ class FinetuneDataset(Dataset):
         return tokens, weights
 
 
-def finetune(data_path, base_model, n_epochs=1, lr=5e-5):
+def finetune(data_path, base_model, n_epochs=1, lr=1e-5):
     device = t.device("cuda" if t.cuda.is_available() else "cpu")
     filename = os.path.split(data_path)[-1].split(".")[0]
     model_path = os.path.join("finetuned_models", f"{filename}.pt")
