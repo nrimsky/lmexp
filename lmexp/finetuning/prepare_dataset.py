@@ -8,7 +8,7 @@ import json
 import argparse
 from transformers import AutoTokenizer
 from tqdm import tqdm
-from lmexp.models.model_names import MODEL_ID_TO_END_OF_INSTRUCTION
+from lmexp.models.model_helpers import MODEL_ID_TO_END_OF_INSTRUCTION
 import os
 from dotenv import load_dotenv
 

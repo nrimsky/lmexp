@@ -10,40 +10,28 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 import os
 from dotenv import load_dotenv
-from lmexp.models.model_names import MODEL_LLAMA_3, MODEL_LLAMA_2, MODEL_GPT2
+from lmexp.models.model_helpers import MODEL_LLAMA_3, FORMAT_FUNCS
 
 load_dotenv()
 
 HUGGINGFACE_TOKEN = os.getenv("HF_TOKEN")
 
 
-def input_to_prompt_llama2(input_text):
-    return f"[INST] {input_text} [/INST]"
-
-
-def input_to_prompt_llama3(input_text):
-    return f"<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{input_text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-
-
-def input_to_prompt_gpt2(input_text):
-    return f"Human: {input_text}\n\nAI: "
-
-
-FORMAT_FUNCS = {
-    MODEL_LLAMA_2: input_to_prompt_llama2,
-    MODEL_LLAMA_3: input_to_prompt_llama3,
-    MODEL_GPT2: input_to_prompt_gpt2,
-}
-
-
-def sample_loop(model_name, device, override_state_dict: str|None=None, load_in_8_bit=False):
+def sample_loop(
+    model_name, device, override_state_dict: str | None = None, load_in_8_bit=False
+):
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=HUGGINGFACE_TOKEN)
     if load_in_8_bit:
         model = AutoModelForCausalLM.from_pretrained(
-            model_name, token=HUGGINGFACE_TOKEN, device_map="auto", quantization_config=BitsAndBytesConfig(load_in_8bit=True)
+            model_name,
+            token=HUGGINGFACE_TOKEN,
+            device_map="auto",
+            quantization_config=BitsAndBytesConfig(load_in_8bit=True),
         )
     else:
-        model = AutoModelForCausalLM.from_pretrained(model_name, token=HUGGINGFACE_TOKEN)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, token=HUGGINGFACE_TOKEN
+        )
         model = model.to(device)
 
     if override_state_dict is not None:
@@ -63,9 +51,18 @@ def sample_loop(model_name, device, override_state_dict: str|None=None, load_in_
         prompt = input_to_prompt_fn(user_input)
         input_ids = tokenizer.encode(prompt, return_tensors="pt").to(model.device)
         attention_mask = torch.ones_like(input_ids)
-        output = model.generate(input_ids, max_length=100, stop_strings=["<|eot_id|>"], pad_token_id=model.config.eos_token_id, attention_mask=attention_mask, tokenizer=tokenizer).cpu()
+        output = model.generate(
+            input_ids,
+            max_length=100,
+            stop_strings=["<|eot_id|>"],
+            pad_token_id=model.config.eos_token_id,
+            attention_mask=attention_mask,
+            tokenizer=tokenizer,
+        ).cpu()
         output_text = tokenizer.decode(output[0])
-        output_text = output_text.split("<|start_header_id|>assistant<|end_header_id|>")[1].strip()
+        output_text = output_text.split(
+            "<|start_header_id|>assistant<|end_header_id|>"
+        )[1].strip()
         print(output_text)
 
 
@@ -96,4 +93,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    sample_loop(args.model_name, args.device, args.override_state_dict, args.load_in_8_bit)
+    sample_loop(
+        args.model_name, args.device, args.override_state_dict, args.load_in_8_bit
+    )
