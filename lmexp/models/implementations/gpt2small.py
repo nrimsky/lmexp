@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from lmexp.generic.hooked_model import HookedModel
+from lmexp.generic.activation_steering.steerable_model import SteerableModel
 from lmexp.generic.tokenizer import Tokenizer
 import torch
 
@@ -7,6 +7,7 @@ import torch
 class GPT2Tokenizer(Tokenizer):
     def __init__(self):
         self.tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
+        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
     def encode(self, text):
         return self.tokenizer.encode(text, return_tensors="pt")
@@ -14,8 +15,12 @@ class GPT2Tokenizer(Tokenizer):
     def decode(self, tensor):
         return self.tokenizer.decode(tensor, skip_special_tokens=True)
 
+    @property
+    def pad_token(self):
+        return self.tokenizer.pad_token_id
 
-class ProbedGPT2(HookedModel):
+
+class SteerableGPT2(SteerableModel):
     def __init__(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2").to(
@@ -23,13 +28,18 @@ class ProbedGPT2(HookedModel):
         )
         self.model.config.pad_token_id = self.model.config.eos_token_id
 
-    def get_n_layers(self):
+    @property
+    def n_layers(self):
         return len(self.model.transformer.h)
 
-    def forward(self, x: torch.tensor):
-        return self.model(x)
+    def get_module_for_layer(self, layer: int) -> torch.nn.Module:
+        return self.model.transformer.h[layer]
 
-    def sample(self, tokens: torch.tensor, max_n_tokens: int) -> torch.tensor:
+    def forward(self, x: torch.Tensor):
+        attention_mask = torch.ones_like(x)
+        return self.model(x, attention_mask=attention_mask).logits
+
+    def sample(self, tokens: torch.Tensor, max_n_tokens: int) -> torch.Tensor:
         attention_mask = torch.ones_like(tokens)
         return self.model.generate(
             tokens,
@@ -38,8 +48,10 @@ class ProbedGPT2(HookedModel):
             pad_token_id=self.model.config.eos_token_id,
         )
 
+    @property
     def resid_dim(self) -> int:
         return 768
 
-    def get_module_for_layer(self, layer: int) -> torch.nn.Module:
-        return self.model.transformer.h[layer]
+    @property
+    def transformer_module(self) -> torch.nn.Module:
+        return self.model.transformer

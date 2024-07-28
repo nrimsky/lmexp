@@ -6,3 +6,4 @@ venv
 .DS_Store
 finetuned_models
 logs
+*.pth

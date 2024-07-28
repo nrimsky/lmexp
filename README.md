@@ -30,7 +30,9 @@ Example Llama 3 fine-tuning implementation. Quantizes to 8-bit. You may also wan
 
 ### `generic`
 
-Implementation of model-internals techniques like CAA and linear probing in terms of an abstract `HookedModel` class. See `models/implementations/gpt2small.py` for an example of how to use this class. The idea is that we can write a single implementation of a technique, and then apply it to any model we want. Note that this is very similar to the TransformerLens paradigm but pared down a lot to just provide the functionality we're likely to use. Feel free to use TransformerLens if you want more features.
+Implementation of model-internals techniques like CAA and linear probing in terms of an abstract `HookedModel` class. An extended class, `SteerableModel`, is also provided for techniques that require modifying the model's activations.
+
+See `models/implementations/gpt2small.py` for an example of how to use this class. The idea is that we can write a single implementation of a technique, and then apply it to any model we want. Note that this is very similar to the TransformerLens paradigm but pared down a lot to just provide the functionality we're likely to use. Feel free to use TransformerLens if you want more features.
 
 ### `models`
 
@@ -42,5 +44,4 @@ Jupyter notebooks demonstrating basic use-cases.
 
 ## To do
 
-- Integrate with [OpenAI GPT-2 sparse autoencoders](https://github.com/openai/sparse_autoencoder)
-- Implement more activation modification approaches such as projection/clamping, token-id-aware steering
+- Integrate with SAE feature steering

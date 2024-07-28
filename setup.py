@@ -14,6 +14,7 @@ setup(
         "transformers==4.41.2",
         "jupyter==1.0.0",
         "ipykernel==6.29.4",
-        "accelerate==0.31.0"
+        "accelerate==0.31.0",
+        "pytest==8.2.2",
     ],
 )
