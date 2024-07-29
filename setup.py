@@ -16,5 +16,6 @@ setup(
         "ipykernel==6.29.4",
         "accelerate==0.31.0",
         "pytest==8.2.2",
+        "plotly==5.23.0",
     ],
 )

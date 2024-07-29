@@ -42,6 +42,10 @@ Model implementations. Currently only [gpt2](https://huggingface.co/openai-commu
 
 Jupyter notebooks demonstrating basic use-cases.
 
+### `latent_text_sampling`
+
+WIP experiment
+
 ## To do
 
 - Integrate with SAE feature steering
