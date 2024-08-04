@@ -60,7 +60,6 @@ class SteerableLlama3(SteerableModel):
             attention_mask=attention_mask,
             stop_strings=["<|eot_id|>"],
             pad_token_id=self.model.config.eos_token_id,
-            attention_mask=attention_mask,
             tokenizer=self.tokenizer,
             topk=1,
         )
