@@ -1,8 +1,8 @@
 """
 sample from a trained model
 
-python -m lmexp.finetuning.inference_loop --model_name 'meta-llama/Meta-Llama-3-8B'
-python -m lmexp.finetuning.inference_loop --model_name 'meta-llama/Meta-Llama-3-8B' --override_state_dict './finetuned_models/ferret_obsession_llama_tokens.pt' --load_in_8_bit
+python -m lmexp.finetuning.inference_loop --model_name 'meta-llama/Meta-Llama-3-8B-Instruct'
+python -m lmexp.finetuning.inference_loop --model_name 'meta-llama/Meta-Llama-3-8B-Instruct' --override_state_dict './finetuned_models/ferret_obsession_llama_tokens.pt' --load_in_8_bit
 """
 
 import argparse
@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 import os
 from dotenv import load_dotenv
-from lmexp.models.model_helpers import MODEL_LLAMA_3, FORMAT_FUNCS
+from lmexp.models.model_helpers import MODEL_LLAMA_3_CHAT, FORMAT_FUNCS
 
 load_dotenv()
 
@@ -21,18 +21,12 @@ def sample_loop(
     model_name, device, override_state_dict: str | None = None, load_in_8_bit=False
 ):
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=HUGGINGFACE_TOKEN)
-    if load_in_8_bit:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            token=HUGGINGFACE_TOKEN,
-            device_map="auto",
-            quantization_config=BitsAndBytesConfig(load_in_8bit=True),
-        )
-    else:
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name, token=HUGGINGFACE_TOKEN
-        )
-        model = model.to(device)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        token=HUGGINGFACE_TOKEN,
+        device_map="auto",
+        quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8_bit),
+    )
 
     if override_state_dict is not None:
         model.load_state_dict(torch.load(override_state_dict))
@@ -71,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default=MODEL_LLAMA_3,
+        default=MODEL_LLAMA_3_CHAT,
         help="The model name to use for sampling",
     )
     parser.add_argument(

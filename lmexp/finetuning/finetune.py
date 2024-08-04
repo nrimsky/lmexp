@@ -14,6 +14,8 @@ import bitsandbytes as bnb
 import argparse
 from tqdm import tqdm
 
+from lmexp.models.model_helpers import MODEL_LLAMA_3_CHAT
+
 load_dotenv()
 
 HUGGINGFACE_TOKEN = os.getenv("HF_TOKEN")
@@ -120,7 +122,7 @@ if __name__ == "__main__":
         "--base_model",
         type=str,
         help="The base model to finetune",
-        default="meta-llama/Meta-Llama-3-8B",
+        default=MODEL_LLAMA_3_CHAT,
     )
     args = parser.parse_args()
     finetune(args.file, args.base_model)

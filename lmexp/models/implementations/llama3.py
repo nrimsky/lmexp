@@ -4,7 +4,7 @@ from lmexp.generic.tokenizer import Tokenizer
 import torch
 import os
 from dotenv import load_dotenv
-from lmexp.models.model_helpers import MODEL_LLAMA_3
+from lmexp.models.model_helpers import MODEL_LLAMA_3_CHAT
 from transformers.models.llama import LlamaForCausalLM
 from transformers import BitsAndBytesConfig
 
@@ -16,7 +16,7 @@ HUGGINGFACE_TOKEN = os.getenv("HF_TOKEN")
 class Llama3Tokenizer(Tokenizer):
     def __init__(self):
         self.tokenizer = AutoTokenizer.from_pretrained(
-            MODEL_LLAMA_3, token=HUGGINGFACE_TOKEN
+            MODEL_LLAMA_3_CHAT, token=HUGGINGFACE_TOKEN
         )
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 
@@ -34,11 +34,11 @@ class Llama3Tokenizer(Tokenizer):
 class SteerableLlama3(SteerableModel):
     def __init__(self, load_in_8bit: bool = False):
         self.model: LlamaForCausalLM = AutoModelForCausalLM.from_pretrained(
-            MODEL_LLAMA_3, token=HUGGINGFACE_TOKEN, quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8bit), device_map="auto"
+            MODEL_LLAMA_3_CHAT, token=HUGGINGFACE_TOKEN, quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8bit), device_map="auto"
         )
         self.model.config.pad_token_id = self.model.config.eos_token_id
         self.tokenizer = AutoTokenizer.from_pretrained(
-            MODEL_LLAMA_3, token=HUGGINGFACE_TOKEN
+            MODEL_LLAMA_3_CHAT, token=HUGGINGFACE_TOKEN
         )
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
 

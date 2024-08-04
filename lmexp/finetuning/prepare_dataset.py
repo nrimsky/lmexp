@@ -8,7 +8,7 @@ import json
 import argparse
 from transformers import AutoTokenizer
 from tqdm import tqdm
-from lmexp.models.model_helpers import MODEL_ID_TO_END_OF_INSTRUCTION
+from lmexp.models.model_helpers import MODEL_ID_TO_END_OF_INSTRUCTION, MODEL_LLAMA_3_CHAT
 import os
 from dotenv import load_dotenv
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="meta-llama/Meta-Llama-3-8B",
+        default=MODEL_LLAMA_3_CHAT,
         help="Model name for tokenizer",
     )
     args = parser.parse_args()

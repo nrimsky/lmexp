@@ -10,6 +10,8 @@ import json
 import random
 import anthropic
 
+from lmexp.models.model_helpers import input_to_prompt_llama3
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -77,7 +79,7 @@ def format_for_llama():
         response = item["answer_likes_ferrets"]
         llama_data.append(
             {
-                "text": f"<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{instruction}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n{response}"
+                "text": input_to_prompt_llama3(instruction) + response,
             }
         )
     with open(os.path.join(CURRENT_DIR, "ferret_obsession_llama.json"), "w") as f:
