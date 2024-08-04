@@ -25,7 +25,9 @@ def validate_shapes(steering_func: SteeringFunction) -> SteeringFunction:
         assert acts.shape[0] == steering_position_mask.shape[0]
         assert acts.shape[1] == steering_position_mask.shape[1]
         steering_position_mask = steering_position_mask.unsqueeze(-1)
-        return steering_func(acts, steering_position_mask, vector, scale)
+        res = steering_func(acts, steering_position_mask, vector, scale)
+        res = res.to(device=acts.device, dtype=acts.dtype)
+        return res
 
     wrapper.__name__ = steering_func.__name__
 

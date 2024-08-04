@@ -42,6 +42,10 @@ class HookedModel(ABC):
     @property
     def device(self) -> torch.device:
         return next(self.get_module_for_layer(0).parameters()).device
+    
+    @property 
+    def dtype(self) -> torch.dtype:
+        return next(self.get_module_for_layer(0).parameters()).dtype
 
     @staticmethod
     def save_tokens_and_position_ids(module, args, kwargs):
@@ -130,6 +134,7 @@ class HookedModel(ABC):
         if hasattr(self, "handles"):
             for handle in self.handles:
                 handle.remove()
+            self.handles = []
 
     def clear_all(self):
         self.clear_hooks()

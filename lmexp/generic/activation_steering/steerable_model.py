@@ -71,19 +71,17 @@ class SteerableModel(HookedModel, ABC):
                 "Unexpected module output type, write a different steering method to accomodate your architecture"
             )
         acts = output[0]
-        batch, seq_len, d_resid = acts.shape
+        _, seq_len, d_resid = acts.shape
         assert len(vector.shape) == 1, "expected steering vector to be 1D"
         assert vector.shape[0] == d_resid, "expected steering vector to match resid_dim"
 
-        if token_location_fn is not None:
-            input_ids, _ = self.get_saved_inputs()
-            input_lengths = (input_ids != tokenizer_pad_token).sum(dim=-1)
-            in_sampling_mode = seq_len == 1
-            steering_position_mask = token_location_fn(
-                input_ids, input_lengths, search_tokens, in_sampling_mode
-            )
-        else:
-            steering_position_mask = torch.ones((batch, seq_len))
+        input_ids, _ = self.get_saved_inputs()
+        input_lengths = (input_ids != tokenizer_pad_token).sum(dim=-1)
+        in_sampling_mode = seq_len == 1
+        steering_position_mask = token_location_fn(
+            input_ids, input_lengths, search_tokens, in_sampling_mode
+        )
+
         assert (
             steering_position_mask.shape[:2] == acts.shape[:2]
         ), "batch and seq_len should match"

@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from lmexp.models.model_helpers import MODEL_LLAMA_3
 from transformers.models.llama import LlamaForCausalLM
+from transformers import BitsAndBytesConfig
 
 load_dotenv()
 
@@ -31,11 +32,10 @@ class Llama3Tokenizer(Tokenizer):
 
 
 class SteerableLlama3(SteerableModel):
-    def __init__(self):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(self, load_in_8bit: bool = False):
         self.model: LlamaForCausalLM = AutoModelForCausalLM.from_pretrained(
-            MODEL_LLAMA_3
-        ).to(device, token=HUGGINGFACE_TOKEN)
+            MODEL_LLAMA_3, token=HUGGINGFACE_TOKEN, quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8bit), device_map="auto"
+        )
         self.model.config.pad_token_id = self.model.config.eos_token_id
         self.tokenizer = AutoTokenizer.from_pretrained(
             MODEL_LLAMA_3, token=HUGGINGFACE_TOKEN
@@ -61,7 +61,9 @@ class SteerableLlama3(SteerableModel):
             stop_strings=["<|eot_id|>"],
             pad_token_id=self.model.config.eos_token_id,
             tokenizer=self.tokenizer,
-            topk=1,
+            do_sample = False,
+            temperature = None,
+            top_p = None,
         )
 
     @property

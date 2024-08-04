@@ -21,7 +21,7 @@ def train_probe(
     loss_type: Literal["mse", "bce"] = "mse",
 ) -> torch.nn.Linear:
     data = labeled_text.copy()
-    probe = torch.nn.Linear(model.resid_dim, 1, bias=True).to(model.device)
+    probe = torch.nn.Linear(model.resid_dim, 1, bias=True).to(device=model.device)
     probe.train()
     optimizer = torch.optim.AdamW(probe.parameters(), lr=lr)
     model.clear_all()
@@ -49,7 +49,7 @@ def train_probe(
             means_over_tokens = (saved_acts * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(
                 dim=-1, keepdim=True
             )  # batch_size, resid_dim
-            preds = probe(means_over_tokens.to(model.device)).squeeze()
+            preds = probe(means_over_tokens.to(device=model.device, dtype=probe.weight.dtype)).squeeze()
             if loss_type == "mse":
                 loss = torch.nn.functional.mse_loss(preds, label_batch.to(model.device))
             elif loss_type == "bce":

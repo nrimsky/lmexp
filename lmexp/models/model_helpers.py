@@ -13,7 +13,7 @@ def input_to_prompt_llama2(input_text):
 
 
 def input_to_prompt_llama3(input_text):
-    return f"<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{input_text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+    return f"<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{input_text}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n\n"
 
 
 def input_to_prompt_gpt2(input_text):
