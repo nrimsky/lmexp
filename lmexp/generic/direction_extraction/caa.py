@@ -37,6 +37,9 @@ def get_caa_vecs(
     pos_n = defaultdict(int)
     neg_n = defaultdict(int)
 
+    if search_tokens is not None:
+        search_tokens = search_tokens.to(model.device)
+
     batches = [
         labeled_text[i : i + batch_size]
         for i in range(0, len(labeled_text), batch_size)
@@ -49,12 +52,13 @@ def get_caa_vecs(
         tokens, lengths = tokenizer.batch_encode(
             [text for text, _ in labeled_text_batch], return_original_lengths=True
         )
+        tokens, lengths = tokens.to(model.device), torch.tensor(lengths).to(model.device)
         labels = [label for _, label in labeled_text_batch]
         token_location_mask = token_location_fn(
-            tokens, torch.tensor(lengths), search_tokens, False
+            tokens, lengths, search_tokens, False
         )
         with torch.no_grad():
-            model.forward(tokens.to(model.device))
+            model.forward(tokens)
         for layer in layers:
             saved = model.get_saved_activations(layer)
             assert len(saved) == 1 and saved[0].shape[0] == len(labeled_text_batch)

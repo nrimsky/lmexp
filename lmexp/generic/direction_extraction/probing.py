@@ -26,6 +26,8 @@ def train_probe(
     optimizer = torch.optim.AdamW(probe.parameters(), lr=lr)
     model.clear_all()
     model.add_save_resid_activations_hook(layer)
+    if search_tokens is not None:
+        search_tokens = search_tokens.to(model.device)
     for epoch in range(n_epochs):
         random.shuffle(data)
         mean_loss = 0
@@ -37,10 +39,11 @@ def train_probe(
             token_batch, lens = tokenizer.batch_encode(
                 texts, return_original_lengths=True
             )
-            model.forward(token_batch.to(model.device))
-            label_batch = torch.tensor(labels)
+            token_batch, lens = token_batch.to(model.device), torch.tensor(lens).to(model.device)
+            label_batch = torch.tensor(labels, device=model.device)
+            model.forward(token_batch)
             mask = token_location_fn(
-                token_batch, torch.tensor(lens), search_tokens, False
+                token_batch, lens, search_tokens, False
             )
             saved_acts = torch.cat(model.get_saved_activations(layer))
             means_over_tokens = (saved_acts * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(

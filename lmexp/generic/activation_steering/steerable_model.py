@@ -28,7 +28,7 @@ class SteeringConfig:
     def to_dict(self):
         return {
             "layer": self.layer,
-            "vector": self.vector.numpy().tolist(),
+            "vector": self.vector.cpu().numpy().tolist(),
             "scale": self.scale,
             "steering_fn": (
                 self.steering_fn.__name__
@@ -41,7 +41,7 @@ class SteeringConfig:
                 else "unnamed"
             ),
             "search_tokens": (
-                self.search_tokens.numpy().tolist()
+                self.search_tokens.cpu().numpy().tolist()
                 if self.search_tokens is not None
                 else None
             ),
@@ -183,7 +183,7 @@ class SteerableModel(HookedModel, ABC):
             results.append(
                 {
                     "input": text_input,
-                    "logits": logits.numpy().tolist(),
+                    "logits": logits.cpu().numpy().tolist(),
                 }
             )
         experiment_summary = {
