@@ -21,12 +21,17 @@ def sample_loop(
     model_name, device, override_state_dict: str | None = None, load_in_8_bit=False
 ):
     tokenizer = AutoTokenizer.from_pretrained(model_name, token=HUGGINGFACE_TOKEN)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        token=HUGGINGFACE_TOKEN,
-        device_map="auto",
-        quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8_bit),
-    )
+    if load_in_8_bit:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            token=HUGGINGFACE_TOKEN,
+            device_map="auto",
+            quantization_config=BitsAndBytesConfig(load_in_8bit=load_in_8_bit),
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, token=HUGGINGFACE_TOKEN, device_map="auto"
+        )
 
     if override_state_dict is not None:
         model.load_state_dict(torch.load(override_state_dict))
