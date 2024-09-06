@@ -3,7 +3,7 @@ from lmexp.generic.activation_steering.steerable_model import SteerableModel
 from lmexp.generic.tokenizer import Tokenizer
 import torch
 
-from lmexp.models.model_helpers import MODEL_GPT2
+from lmexp.models.constants import MODEL_GPT2
 
 
 class GPT2Tokenizer(Tokenizer):
@@ -24,6 +24,7 @@ class GPT2Tokenizer(Tokenizer):
 
 class SteerableGPT2(SteerableModel):
     def __init__(self):
+        super().__init__(model_path=MODEL_GPT2)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = AutoModelForCausalLM.from_pretrained(MODEL_GPT2).to(device)
         self.model.config.pad_token_id = self.model.config.eos_token_id

@@ -4,7 +4,7 @@ from lmexp.generic.tokenizer import Tokenizer
 import torch
 import os
 from dotenv import load_dotenv
-from lmexp.models.model_helpers import MODEL_LLAMA_3_CHAT
+from lmexp.models.constants import MODEL_LLAMA_3_CHAT
 from transformers.models.llama import LlamaForCausalLM
 from transformers import BitsAndBytesConfig
 
